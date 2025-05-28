@@ -1,37 +1,16 @@
-import axios from "axios";
-import iziToast from "izitoast";
-import "izitoast/dist/css/iziToast.min.css";
+import axios from 'axios';
 
-const API_KEY = "48859120-c5edc5c574d1328ed42f58f74";
-const BASE_URL = "https://pixabay.com/api/";
+const BASE_URL = 'https://pixabay.com/api/';
+const API_KEY = '50309371-d07515f8c9a862bfe72f170ff';
 
-export async function fetchImages(query) {
-    try {
-        const response = await axios.get(`${BASE_URL}`, {
-            params: {
-                key: API_KEY,
-                q: query,
-                image_type: "photo",
-                orientation: "horizontal",
-                safesearch: true,
-                per_page: 40,
-            },
-        });
-
-        if (!response.data.hits || response.data.hits.length === 0) {
-            return { hits: [], totalHits: 0 };
-        }
-
-        return {
-            hits: response.data.hits,
-            totalHits: response.data.totalHits,
-        };
-    } catch (error) {
-        iziToast.error({
-            title: "Error",
-            message: "Failed to fetch images. Try again!",
-        });
-        console.error("Fetch error:", error);
-        return { hits: [], totalHits: 0 };
-    }
+export function getImagesByQuery(query) {
+    return axios.get(BASE_URL, {
+        params: {
+            key: API_KEY,
+            q: query,
+            image_type: 'photo',
+            orientation: 'horizontal',
+            safesearch: true,
+        },
+    }).then(response => response.data);
 }
