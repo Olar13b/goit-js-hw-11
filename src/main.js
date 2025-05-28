@@ -1,55 +1,59 @@
-import { fetchImages } from "./js/pixabay-api.js";
-import { renderGallery } from "./js/render-functions.js";
-
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
-import "css-loader";
 
-import closeIcon from "./img/close.png";
+import { createGallery, clearGallery, showLoader, hideLoader } from "./js/render-functions";
+import { getImagesByQuery } from "./js/pixabay-api";
 
-const form = document.querySelector(".form");
-const gallery = document.querySelector(".gallery");
-const loader = document.querySelector(".loader");
+const formEl = document.querySelector('.form');
+const galleryEl = document.querySelector('.gallery');
+const loaderEl = document.querySelector('.loader');
 
-formEl.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const query = event.target.elements.searchQuery.value.trim();
+
+formEl.addEventListener('submit', e => {
+    e.preventDefault();
+
+    clearGallery();
+
+    const query = e.target.elements['search-text'].value.trim();
 
     if (!query) {
-        iziToast.warning({ title: "Warning", message: "Please enter a search term!" });
-        return;
-    }
-
-    gallery.innerHTML = "";
-    loader.classList.remove("hidden");
-
-    const { hits, totalHits } = await fetchImages(query);
-    loader.classList.add("hidden");
-
-    if (hits.length === 0) {
-        iziToast.error({
-            message: "Sorry, there are no images matching your search query. Please, try again!",
-            position: "topRight",
-            backgroundColor: "#ef4040",
-            titleColor: "#ffffff",
-            messageColor: "#ffffff",
-            timeout: 5000,
-            iconUrl: crossIcon,
-            close: false,
-            buttons: [
-                [
-                    `<button class="toast-close-btn">
-                <img src="${closeIcon}" style="width: 12px; height: 12px;">
-            </button>`,
-                    function (instance, toast) {
-                        instance.hide({ transitionOut: "fadeOut" }, toast);
-                    },
-                ],
-            ],
+        iziToast.warning({
+          title: 'Attentione',
+          message: 'The field cannot be empty!',
+          position: 'topRight'
         });
         return;
-    }
+      }
 
-    renderGallery(hits);
-    form.reset();
+    showLoader();
+
+    getImagesByQuery(query)
+        .then(data => {
+            const images = data.hits;
+
+            if (images.length === 0) {
+                iziToast.warning({
+                    title: 'Sorry',
+                    message: 'There are no images matching your search query. Please try again!',
+                    position: 'topRight',
+                    timeout: 3000,
+                });
+                return;
+            }
+
+            createGallery(images);
+            formEl.reset();
+        })
+        .catch(error => {
+            console.error('Помилка при отриманні зображень:', error.message);
+            iziToast.error({
+                title: 'Error',
+                message: 'Failed to fetch images. Please try again later.',
+                position: 'topRight',
+                timeout: 3000,
+            });
+        })
+        .finally(() => {
+            hideLoader();
+        });
 });
