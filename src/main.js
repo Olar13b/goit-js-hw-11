@@ -7,11 +7,11 @@ import "css-loader";
 
 import closeIcon from "./img/close.png";
 
-const form = document.querySelector("#form");
+const form = document.querySelector(".form");
 const gallery = document.querySelector(".gallery");
 const loader = document.querySelector(".loader");
 
-form.addEventListener("submit", async (event) => {
+formEl.addEventListener("submit", async (event) => {
     event.preventDefault();
     const query = event.target.elements.searchQuery.value.trim();
 
